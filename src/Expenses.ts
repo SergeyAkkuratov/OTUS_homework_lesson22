@@ -100,7 +100,7 @@ export class Expenses {
       } else {
         sortedEpenses.sort((a, b) =>
           // eslint-disable-next-line no-nested-ternary
-        a.sum < b.sum ? -1 : a.sum > b.sum ? 1 : 0,
+          a.sum < b.sum ? -1 : a.sum > b.sum ? 1 : 0,
         );
       }
       return sortedEpenses;
@@ -111,8 +111,8 @@ export class Expenses {
   getExpensesByDay(start: Date, end: Date) {
     const expenses = this.getRecordsForPeriod(start, end).reduce(
       (result, record) => {
-        const dateKey = record.date.toISOString().split('T')[0];
-        if (Object.keys(result).includes(dateKey)){
+        const dateKey = record.date.toISOString().split("T")[0];
+        if (Object.keys(result).includes(dateKey)) {
           result[dateKey] += record.sum;
         } else {
           result[dateKey] = record.sum;

@@ -8,7 +8,9 @@ export default class DatabaseTable<T> implements IDatabaseTable<T> {
   constructor(name: string, defaultValues?: T[]) {
     this.name = name;
     if (defaultValues) {
-      this.table = JSON.parse(localStorage.getItem(this.name) ?? JSON.stringify(defaultValues));
+      this.table = JSON.parse(
+        localStorage.getItem(this.name) ?? JSON.stringify(defaultValues),
+      );
     } else {
       this.table = JSON.parse(localStorage.getItem(this.name) ?? "[]");
     }
