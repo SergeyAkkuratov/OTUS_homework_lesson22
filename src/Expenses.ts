@@ -21,7 +21,7 @@ export type Filter = {
   fn: (element: Expens) => boolean;
 };
 
-const defaultCategories: Category[] = [
+export const defaultCategories: Category[] = [
   { name: "Food" },
   { name: "Medicine" },
   { name: "Transport" },
@@ -29,7 +29,7 @@ const defaultCategories: Category[] = [
   { name: "Bills" },
 ];
 
-const defaultSubCategories: SubCategory[] = [
+export const defaultSubCategories: SubCategory[] = [
   { name: "General", categoryId: 0 },
   { name: "Pet", categoryId: 0 },
   { name: "Child", categoryId: 0 },
@@ -37,7 +37,7 @@ const defaultSubCategories: SubCategory[] = [
   { name: "Taxi", categoryId: 2 },
   { name: "Cinema", categoryId: 3 },
   { name: "Houes", categoryId: 4 },
-  { name: "Taxes", categoryId: 3 },
+  { name: "Taxes", categoryId: 4 },
 ];
 
 export class Expenses {
@@ -56,7 +56,7 @@ export class Expenses {
       "subCategories",
       defaultSubCategories,
     );
-    this.records = new DatabaseTable<Expens>("records");
+    this.records = new DatabaseTable<Expens>("expens");
   }
 
   private getRecordsForPeriod(start: Date, end: Date): Expens[] {
@@ -86,38 +86,45 @@ export class Expenses {
       },
       {} as Record<string, number>,
     );
+    const sortedEpenses = Object.keys(expenses).map((key) => ({
+      category: key,
+      sum: expenses[key],
+    }));
 
     if (sort) {
-      const sortedEpenses = Object.keys(expenses).map((key) => ({
-        category: key,
-        sum: expenses[key],
-      }));
-      if (sort === "asc") {
+      if (sort === "dsc") {
         sortedEpenses.sort((a, b) =>
           // eslint-disable-next-line no-nested-ternary
-          a.sum < b.sum ? -1 : a.sum > b.sum ? 1 : 0,
+          a.sum < b.sum ? 1 : a.sum > b.sum ? -1 : 0,
         );
       } else {
         sortedEpenses.sort((a, b) =>
           // eslint-disable-next-line no-nested-ternary
-          a.sum < b.sum ? 0 : a.sum > b.sum ? 1 : -1,
+        a.sum < b.sum ? -1 : a.sum > b.sum ? 1 : 0,
         );
       }
       return sortedEpenses;
     }
-    return expenses;
+    return sortedEpenses;
   }
 
   getExpensesByDay(start: Date, end: Date) {
-    return this.getRecordsForPeriod(start, end).reduce(
+    const expenses = this.getRecordsForPeriod(start, end).reduce(
       (result, record) => {
-        if (Object.keys(result).includes(record.date.toDateString()))
-          result[record.date.toDateString()] += record.sum;
-        else result[record.date.toDateString()] = record.sum;
+        const dateKey = record.date.toISOString().split('T')[0];
+        if (Object.keys(result).includes(dateKey)){
+          result[dateKey] += record.sum;
+        } else {
+          result[dateKey] = record.sum;
+        }
         return result;
       },
       {} as Record<string, number>,
     );
+    return Object.keys(expenses).map((key) => ({
+      date: key,
+      sum: expenses[key],
+    }));
   }
 
   getExpensesByFilter(filters: Filter[]) {
