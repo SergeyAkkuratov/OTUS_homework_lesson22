@@ -111,7 +111,7 @@ describe("DatabaseTable tests", () => {
     expect(Object.keys(localStorage.__STORE__).length).toBe(1);
 
     const errorCall = () => dbTable.removeItem(-1);
-    expect(errorCall).toThrow("id must be 0 or greater!");
+    expect(errorCall).toThrow("There is no record with id -1");
   });
 
   it("Checks getItem function", () => {
@@ -124,7 +124,7 @@ describe("DatabaseTable tests", () => {
     dbTable = new DatabaseTable<TestItem>(testName, testDefault);
 
     const errorCall = () => dbTable.getItem(-1);
-    expect(errorCall).toThrow("id must be 0 or greater!");
+    expect(errorCall).toThrow("There is no record with id -1");
 
     const item: TestItem = dbTable.getItem(0);
     expect(item).toStrictEqual(testDefault[0]);
@@ -140,7 +140,7 @@ describe("DatabaseTable tests", () => {
     dbTable = new DatabaseTable<TestItem>(testName, testDefault);
 
     const errorCall = () => dbTable.updateItem(-1, testDefault[0]);
-    expect(errorCall).toThrow("id must be 0 or greater!");
+    expect(errorCall).toThrow("There is no record with id -1");
 
     dbTable.updateItem(1, testDefault[0]);
     // eslint-disable-next-line prefer-destructuring

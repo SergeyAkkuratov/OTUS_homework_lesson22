@@ -7,44 +7,47 @@ export default class DatabaseTable<T> implements IDatabaseTable<T> {
 
   constructor(name: string, defaultValues?: T[]) {
     this.name = name;
-    if (defaultValues) {
-      this.table = JSON.parse(
-        localStorage.getItem(this.name) ?? JSON.stringify(defaultValues),
-      );
+    const localData = localStorage.getItem(this.name);
+    if (localData) {
+      this.table = JSON.parse(localData);
     } else {
-      this.table = JSON.parse(localStorage.getItem(this.name) ?? "[]");
+      if (defaultValues) {
+        this.table = JSON.parse(JSON.stringify(defaultValues));
+      } else {
+        this.table = [];
+      }
+      this.updateStorage();
     }
-    this.update();
   }
 
-  addItem(item: T) {
+  addItem(item: T): void {
     this.table.push(item);
-    this.update();
+    this.updateStorage();
   }
 
-  removeItem(id: number) {
-    if (id < 0) {
-      throw new Error("id must be 0 or greater!");
+  removeItem(id: number): void {
+    if (!this.table[id]) {
+      throw new Error(`There is no record with id ${id}`);
     }
     this.table.splice(id, 1);
-    this.update();
+    this.updateStorage();
   }
 
   getItem(id: number): T {
-    if (id < 0) {
-      throw new Error("id must be 0 or greater!");
+    if (!this.table[id]) {
+      throw new Error(`There is no record with id ${id}`);
     }
-    return this.table[id]!;
+    return this.table[id];
   }
 
   updateItem(id: number, item: T): void {
-    if (id < 0) {
-      throw new Error("id must be 0 or greater!");
+    if (!this.table[id]) {
+      throw new Error(`There is no record with id ${id}`);
     }
     this.table[id] = item;
   }
 
-  private update() {
+  private updateStorage(): void {
     localStorage.setItem(this.name, JSON.stringify(this.table));
   }
 }
