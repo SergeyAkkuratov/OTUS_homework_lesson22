@@ -1,17 +1,17 @@
-import { Task } from "./ITask";
+import { ITask } from "./ITask";
 
-export interface Filter<T extends Task> {
+export interface IFilter<T extends ITask> {
   (element: T, ...params: never[]): boolean;
 }
 
-export interface Filters<T extends Task> {
-  byDate: Filter<T>;
-  byDateBetween: Filter<T>;
-  byName: Filter<T>;
-  byNameContains: Filter<T>;
-  byStatus: Filter<T>;
-  byTag: Filter<T>;
-  byTagContains: Filter<T>;
-  byDescription: Filter<T>;
-  byDescriptionContains: Filter<T>;
+export interface IFilters<T extends ITask> {
+  byDate: IFilter<T>;
+  byDateBetween: IFilter<T>;
+  byName: IFilter<T>;
+  byNameContains: IFilter<T>;
+  byStatus: IFilter<T>;
+  byTag: IFilter<T>;
+  byTagContains: IFilter<T>;
+  byDescription: IFilter<T>;
+  byDescriptionContains: IFilter<T>;
 }

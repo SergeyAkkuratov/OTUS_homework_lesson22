@@ -1,25 +1,25 @@
-import { Filter, Filters } from "./IFilter";
-import { Task, TaskStatus } from "./ITask";
+import { IFilter, IFilters } from "./IFilter";
+import { ITask, TaskStatus } from "./ITask";
 
-export const defaultFilters: Filters<Task> = {
-  byDate: (element: Task, date: Date) => element.date === date,
-  byDateBetween: (element: Task, start: Date, end: Date) =>
+export const defaultFilters: IFilters<ITask> = {
+  byDate: (element: ITask, date: Date) => element.date === date,
+  byDateBetween: (element: ITask, start: Date, end: Date) =>
     element.date >= start && element.date <= end,
-  byName: (element: Task, name: string) => element.name === name,
-  byNameContains: (element: Task, name: string) => element.name.includes(name),
-  byStatus: (element: Task, status: TaskStatus) => element.status === status,
-  byTag: (element: Task, tags: string[]) => element.tags === tags,
-  byTagContains: (element: Task, tag: string) => element.tags.includes(tag),
-  byDescription: (element: Task, text: string) => element.description === text,
-  byDescriptionContains: (element: Task, text: string) =>
+  byName: (element: ITask, name: string) => element.name === name,
+  byNameContains: (element: ITask, name: string) => element.name.includes(name),
+  byStatus: (element: ITask, status: TaskStatus) => element.status === status,
+  byTag: (element: ITask, tags: string[]) => element.tags === tags,
+  byTagContains: (element: ITask, tag: string) => element.tags.includes(tag),
+  byDescription: (element: ITask, text: string) => element.description === text,
+  byDescriptionContains: (element: ITask, text: string) =>
     element.description.includes(text),
 };
 
-export default interface ICalendar<T extends Task> {
-  getTask(id: string): T;
-  addTask(task: T): void;
-  updateTask(id: string, newTask: T): T;
-  deleteTask(id: string): T;
-  filterTasks(filter: Filter<T>): T[];
-  filters: Filters<T>;
+export default interface ICalendar<T extends ITask> {
+  filters: IFilters<T>;
+  getTask(id: string): Promise<T>;
+  addTask(task: T): Promise<void>;
+  updateTask(id: string, newTask: T): Promise<T>;
+  deleteTask(id: string): Promise<T>;
+  filterTasks(filter: IFilter<T>, ...param: never[]): Promise<T[]>;
 }
