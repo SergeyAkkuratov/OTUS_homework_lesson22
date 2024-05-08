@@ -12,57 +12,39 @@ import ICalendar, { defaultFilters } from "../interfaces/ICalendar";
 import { IFilters, IFilter } from "../interfaces/IFilter";
 import CalendarError from "../interfaces/CalendarError";
 
-export default class Calendar implements ICalendar<ITask> {
-  private tasks!: ITask[];
+const firebaseConfig = {
+  apiKey: "AIzaSyBmPq0iWICIbr5Z2WKZ5pcpQo_ND8uuWM4",
+  authDomain: "akkuratovcalendar.firebaseapp.com",
+  projectId: "akkuratovcalendar",
+  storageBucket: "akkuratovcalendar.appspot.com",
+  messagingSenderId: "378993322495",
+  appId: "1:378993322495:web:0abd7266c4062c67c21fca",
+  databaseURL:
+    "https://akkuratovcalendar-default-rtdb.europe-west1.firebasedatabase.app",
+};
 
-  private namespace: string;
+export default class Calendar implements ICalendar<ITask> {
+  private tasks: ITask[];
 
   private database: DatabaseReference;
 
   readonly filters: IFilters<ITask> = defaultFilters;
 
-  private readonly firebaseConfig = {
-    apiKey: "AIzaSyBmPq0iWICIbr5Z2WKZ5pcpQo_ND8uuWM4",
-    authDomain: "akkuratovcalendar.firebaseapp.com",
-    projectId: "akkuratovcalendar",
-    storageBucket: "akkuratovcalendar.appspot.com",
-    messagingSenderId: "378993322495",
-    appId: "1:378993322495:web:0abd7266c4062c67c21fca",
-    databaseURL:
-      "https://akkuratovcalendar-default-rtdb.europe-west1.firebasedatabase.app",
-  };
-
   public static async build(namespace: string): Promise<Calendar> {
-    const calendar = new Calendar(namespace);
-    calendar.init();
-    return calendar;
-  }
+    const database = ref(getDatabase(initializeApp(firebaseConfig)), namespace);
 
-  private constructor(namespace: string) {
-    this.namespace = namespace;
-    this.database = ref(
-      getDatabase(initializeApp(this.firebaseConfig)),
-      this.namespace,
+    const snapshot = await get(database);
+    if (snapshot) {
+      return new Calendar(database, snapshot.val());
+    }
+    throw new CalendarError(
+      `There is no reference with namespace "${namespace}" in database.`,
     );
   }
 
-  private async init() {
-    get(this.database)
-      .then((snapshot) => {
-        if (snapshot.exists()) {
-          console.log("3");
-          this.tasks = snapshot.val();
-        } else {
-          throw new CalendarError(
-            `There is no reference with namespace "${this.namespace}" in database.`,
-          );
-        }
-      })
-      .catch((error) => {
-        throw new CalendarError(
-          `Couldn't read data from Firebase database with error: ${error}`,
-        );
-      });
+  private constructor(database: DatabaseReference, tasks: ITask[]) {
+    this.database = database;
+    this.tasks = tasks;
   }
 
   async getTask(id: string): Promise<ITask> {
