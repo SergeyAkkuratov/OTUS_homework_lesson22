@@ -1,7 +1,7 @@
 import { ITask } from "./ITask";
 
 export interface IFilter<T extends ITask> {
-  (element: T, ...params: never[]): boolean;
+  (element: T, ...params: unknown[]): boolean;
 }
 
 export interface IFilters<T extends ITask> {
