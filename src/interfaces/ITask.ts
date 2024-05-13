@@ -7,7 +7,7 @@ export enum TaskStatus {
 }
 
 export interface ITask {
-  id: string | undefined;
+  id: string;
   date: Date;
   name: string;
   status: TaskStatus;

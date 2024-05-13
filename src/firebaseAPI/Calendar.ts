@@ -6,6 +6,7 @@ import {
   set,
   get,
   DatabaseReference,
+  child
 } from "firebase/database";
 import { ITask } from "../interfaces/ITask";
 import ICalendar, { defaultFilters } from "../interfaces/ICalendar";
@@ -24,46 +25,29 @@ const firebaseConfig = {
 };
 
 export default class Calendar implements ICalendar<ITask> {
-  private tasks: ITask[];
-
   private database: DatabaseReference;
 
   readonly filters: IFilters<ITask> = defaultFilters;
 
-  public static async build(namespace: string): Promise<Calendar> {
-    const database = ref(getDatabase(initializeApp(firebaseConfig)), namespace);
-
-    const snapshot = await get(database);
-    if (snapshot) {
-      return new Calendar(database, snapshot.val());
-    }
-    throw new CalendarError(
-      `There is no reference with namespace "${namespace}" in database.`,
-    );
-  }
-
-  private constructor(database: DatabaseReference, tasks: ITask[]) {
-    this.database = database;
-    this.tasks = tasks;
+  constructor(namespace: string) {
+    this.database = ref(getDatabase(initializeApp(firebaseConfig)), namespace);
   }
 
   async getTask(id: string): Promise<ITask> {
-    return new Promise<ITask>((resolve, reject) => {
-      const result = this.tasks.find((task) => task.id === id);
-      if (result) {
-        resolve(result);
-      } else {
-        reject(new CalendarError(`There is no task with id: ${id}`));
-      }
+    return new Promise<ITask>((resolve) => {
+      get(child(this.database, id)).then((snapshot) => {
+        if (snapshot.exists()) {
+          resolve(snapshot.val());
+        }
+        throw new CalendarError(`There is no task with id ${id}`);
+      }).catch((error) => {
+        throw new CalendarError(`Couldn't get information from remote Database. Error: ${error}`);
+      });
     });
   }
 
   async addTask(task: ITask): Promise<void> {
-    return new Promise<void>((resolve) => {
-      this.tasks.push(task);
-      this.firebaseUpdate();
-      resolve();
-    });
+    set(child(this.database, task.id), task);
   }
 
   async updateTask(id: string, newTask: ITask): Promise<ITask> {
