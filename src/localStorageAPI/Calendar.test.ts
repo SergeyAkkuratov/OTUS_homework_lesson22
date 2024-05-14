@@ -41,7 +41,7 @@ describe("Test for checking LocalStorage API", () => {
     localStorage.setItem("TEST_ERROR", "NOT A JSON STRING");
     expect(() => new Calendar("TEST_ERROR")).toThrow(
       new CalendarError(
-        "Couldn't create Calendar object, error: SyntaxError: Unexpected token 'N', \"NOT A JSON STRING\" is not valid JSON",
+        "Couldn't create Calendar object, error: SyntaxError: Unexpected token N in JSON at position 0",
       ),
     );
   });
