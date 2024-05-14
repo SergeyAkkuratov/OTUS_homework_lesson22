@@ -6,6 +6,7 @@ describe("Test for checking LocalStorage API", () => {
     const testNamesapce: string = "TEST";
     let calendar: Calendar;
     let testTask: ITask;
+    let testTask2: ITask;
 
     beforeEach(() => {
         localStorage.clear();
@@ -18,6 +19,15 @@ describe("Test for checking LocalStorage API", () => {
             tags: ["test1", "test2"],
             description: "It just a test task"
         }
+
+        testTask2 = {
+            id: "TEST2",
+            date: new Date().toISOString(),
+            name: "TEST2",
+            status: TaskStatus.STARTED,
+            tags: ["test1", "test3"],
+            description: "It just a test task"
+        };
     })
 
     it("Check constructor, getTask and addTask methods", async () => {
@@ -38,35 +48,36 @@ describe("Test for checking LocalStorage API", () => {
 
     it("Check updateTask method", async () => {
         await calendar.addTask(testTask);
-        const testTask2 = {
-            id: "ID2",
-            date: new Date().toISOString(),
-            name: "TEST2",
-            status: TaskStatus.STARTED,
-            tags: ["test1", "test3"],
-            description: "It just a test task"
-        };
+
         const oldTask = await calendar.updateTask(testTask.id, testTask2);
         testTask2.id = testTask.id;
         const currentTask = await calendar.getTask(testTask2.id);
+
         expect(oldTask).toStrictEqual(testTask);
         expect(currentTask).toEqual(testTask2);
     })
 
     it("Check deleteTask method", async () => {
-        const testTask2 = {
-            id: "TEST2",
-            date: new Date().toISOString(),
-            name: "TEST2",
-            status: TaskStatus.STARTED,
-            tags: ["test1", "test3"],
-            description: "It just a test task"
-        };
         await calendar.addTask(testTask);
         await calendar.addTask(testTask2);
         const oldTask = await calendar.deleteTask(testTask.id);
         const tasks = await calendar.getTasks();
         expect(oldTask).toStrictEqual(testTask);
         expect(tasks).toStrictEqual([testTask2]);
+    })
+
+    it("Check filterTasks method", async () => {
+        await calendar.addTask(testTask);
+        await calendar.addTask(testTask2);
+
+        const tasks: ITask[] = await calendar.filterTasks(calendar.filters.byName, "TEST");
+        expect(tasks).toStrictEqual([testTask]);
+    })
+
+    it("Check clear method", async () => {
+        await calendar.addTask(testTask);
+        await expect(calendar.getTasks()).resolves.toStrictEqual([testTask]);
+        await calendar.clear();
+        await expect(calendar.getTasks()).resolves.toStrictEqual([]);
     })
 })

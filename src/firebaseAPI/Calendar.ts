@@ -86,28 +86,10 @@ export default class Calendar implements ICalendar<ITask> {
     });
   }
 
-  async filterTasks(
-    filter: IFilter<ITask>,
-    ...param: unknown[]
-  ): Promise<ITask[]> {
+  async filterTasks(filter: IFilter<ITask>, ...param: unknown[]): Promise<ITask[]> {
+    const tasks = await this.getTasks();
     return new Promise<ITask[]>((resolve) => {
-      get(this.database).then((snapshot) => {
-        if (snapshot.exists()) {
-          const tasks: ITask[] = [];
-          Object.keys(snapshot.val()).forEach(key => {
-            tasks.push(snapshot.val()[key]);
-          }
-          )
-          const result = tasks.filter((task) => filter(task, ...param));
-          if (result) {
-            resolve(result);
-          } else {
-            throw new CalendarError("Unknown error while filtering tasks");
-          }
-        } else {
-          throw new CalendarError(`There is no tasks at all`);
-        }
-      });
+      resolve(tasks.filter((task) => filter(task, ...param)));
     });
   }
 

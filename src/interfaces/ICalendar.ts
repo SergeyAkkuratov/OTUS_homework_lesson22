@@ -25,4 +25,5 @@ export default interface ICalendar<T extends ITask> {
   updateTask(id: string, newTask: T): Promise<T>;
   deleteTask(id: string): Promise<T>;
   filterTasks(filter: IFilter<T>, ...param: unknown[]): Promise<T[]>;
+  clear(): Promise<void>;
 }
