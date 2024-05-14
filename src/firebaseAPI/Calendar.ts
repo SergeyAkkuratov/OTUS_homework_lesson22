@@ -8,7 +8,7 @@ import {
   DatabaseReference,
   child,
   update,
-  remove
+  remove,
 } from "firebase/database";
 import { ITask } from "../interfaces/ITask";
 import ICalendar, { defaultFilters } from "../interfaces/ICalendar";
@@ -32,7 +32,10 @@ export default class Calendar implements ICalendar<ITask> {
   };
 
   constructor(namespace: string) {
-    this.database = ref(getDatabase(initializeApp(this.firebaseConfig)), namespace);
+    this.database = ref(
+      getDatabase(initializeApp(this.firebaseConfig)),
+      namespace,
+    );
   }
 
   async getTask(id: string): Promise<ITask> {
@@ -51,7 +54,7 @@ export default class Calendar implements ICalendar<ITask> {
       const tasks: ITask[] = [];
       get(this.database).then((snapshot) => {
         if (snapshot.exists()) {
-          Object.keys(snapshot.val()).forEach(key => {
+          Object.keys(snapshot.val()).forEach((key) => {
             tasks.push(snapshot.val()[key]);
           });
         }
@@ -86,7 +89,10 @@ export default class Calendar implements ICalendar<ITask> {
     });
   }
 
-  async filterTasks(filter: IFilter<ITask>, ...param: unknown[]): Promise<ITask[]> {
+  async filterTasks(
+    filter: IFilter<ITask>,
+    ...param: unknown[]
+  ): Promise<ITask[]> {
     const tasks = await this.getTasks();
     return new Promise<ITask[]>((resolve) => {
       resolve(tasks.filter((task) => filter(task, ...param)));
