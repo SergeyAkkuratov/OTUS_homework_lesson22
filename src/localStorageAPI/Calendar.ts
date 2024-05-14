@@ -27,13 +27,19 @@ export default class Calendar implements ICalendar<ITask> {
   }
 
   async getTask(id: string): Promise<ITask> {
-    return new Promise<ITask>((resolve, reject) => {
+    return new Promise<ITask>((resolve) => {
       const result = this.tasks.find((task) => task.id === id);
       if (result) {
         resolve(result);
       } else {
-        reject(new CalendarError(`There is no task with id: ${id}`));
+        throw new CalendarError(`There is no task with id: ${id}`);
       }
+    });
+  }
+
+  async getTasks(): Promise<ITask[]> {
+    return new Promise<ITask[]>((resolve) => {
+      resolve(this.tasks);
     });
   }
 
@@ -45,27 +51,23 @@ export default class Calendar implements ICalendar<ITask> {
     });
   }
 
-  async updateTask(id: string, newTask: ITask): Promise<ITask> {
-    return new Promise<ITask>((resolve, reject) => {
-      this.getTask(id)
-        .then((task) => {
-          resolve(task);
-          this.tasks[this.tasks.indexOf(task)] = newTask;
-          this.localStorageUpdate();
-        })
-        .catch((error) => reject(error));
+  async updateTask(id: string, task: ITask): Promise<ITask> {
+    const oldTask = await this.getTask(id);
+    return new Promise<ITask>((resolve) => {
+      const newTask: ITask = structuredClone(task);
+      newTask.id = oldTask.id;
+      this.tasks[this.tasks.indexOf(oldTask)] = newTask;
+      this.localStorageUpdate();
+      resolve(oldTask);
     });
   }
 
   async deleteTask(id: string): Promise<ITask> {
-    return new Promise<ITask>((resolve, reject) => {
-      this.getTask(id)
-        .then((task) => {
-          resolve(task);
-          this.tasks.splice(this.tasks.indexOf(task));
-          this.localStorageUpdate();
-        })
-        .catch((error) => reject(error));
+    const oldTask = await this.getTask(id);
+    return new Promise<ITask>((resolve) => {
+      this.tasks.splice(this.tasks.indexOf(oldTask), 1);
+      this.localStorageUpdate();
+      resolve(oldTask);
     });
   }
 

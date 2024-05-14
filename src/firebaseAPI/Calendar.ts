@@ -16,8 +16,6 @@ import { IFilters, IFilter } from "../interfaces/IFilter";
 import CalendarError from "../interfaces/CalendarError";
 
 export default class Calendar implements ICalendar<ITask> {
-  private readonly namespace: string;
-
   private database: DatabaseReference;
 
   readonly filters: IFilters<ITask> = defaultFilters;
@@ -34,18 +32,30 @@ export default class Calendar implements ICalendar<ITask> {
   };
 
   constructor(namespace: string) {
-    this.namespace = namespace;
-    this.database = ref(getDatabase(initializeApp(this.firebaseConfig)), this.namespace);
+    this.database = ref(getDatabase(initializeApp(this.firebaseConfig)), namespace);
   }
 
   async getTask(id: string): Promise<ITask> {
+    const snapshot = await get(child(this.database, id));
     return new Promise<ITask>((resolve) => {
-      get(child(this.database, id)).then((snapshot) => {
+      if (snapshot.exists()) {
+        resolve(snapshot.val() as ITask);
+      } else {
+        throw new CalendarError(`There is no task with id: ${id}`);
+      }
+    });
+  }
+
+  async getTasks(): Promise<ITask[]> {
+    return new Promise<ITask[]>((resolve) => {
+      const tasks: ITask[] = [];
+      get(this.database).then((snapshot) => {
         if (snapshot.exists()) {
-          resolve(snapshot.val() as ITask);
-        } else {
-          throw new CalendarError(`There is no task with id ${id}`);
+          Object.keys(snapshot.val()).forEach(key => {
+            tasks.push(snapshot.val()[key]);
+          });
         }
+        resolve(tasks);
       });
     });
   }
@@ -54,10 +64,12 @@ export default class Calendar implements ICalendar<ITask> {
     set(child(this.database, task.id), task);
   }
 
-  async updateTask(id: string, newTask: ITask): Promise<ITask> {
+  async updateTask(id: string, task: ITask): Promise<ITask> {
     const oldTask = await this.getTask(id);
+    const newTask: ITask = structuredClone(task);
+    newTask.id = oldTask.id;
 
-    await update(this.database, { [`/${this.namespace}/${newTask.id}`]: newTask });
+    await update(this.database, { [`/${oldTask.id}`]: newTask });
 
     return new Promise<ITask>((resolve) => {
       resolve(oldTask);
@@ -97,5 +109,9 @@ export default class Calendar implements ICalendar<ITask> {
         }
       });
     });
+  }
+
+  async clear(): Promise<void> {
+    set(this.database, null);
   }
 }

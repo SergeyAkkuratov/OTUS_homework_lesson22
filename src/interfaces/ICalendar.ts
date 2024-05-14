@@ -20,6 +20,7 @@ export const defaultFilters: IFilters<ITask> = {
 export default interface ICalendar<T extends ITask> {
   filters: IFilters<T>;
   getTask(id: string): Promise<T>;
+  getTasks(): Promise<ITask[]>;
   addTask(task: T): Promise<void>;
   updateTask(id: string, newTask: T): Promise<T>;
   deleteTask(id: string): Promise<T>;
