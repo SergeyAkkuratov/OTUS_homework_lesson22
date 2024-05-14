@@ -2,9 +2,11 @@ import { IFilter, IFilters } from "./IFilter";
 import { ITask, TaskStatus } from "./ITask";
 
 export const defaultFilters: IFilters<ITask> = {
-  byDate: (element: ITask, date: Date) => element.date === date,
-  byDateBetween: (element: ITask, start: Date, end: Date) =>
-    element.date >= start && element.date <= end,
+  byDate: (element: ITask, date: Date) => new Date(element.date) === date,
+  byDateBetween: (element: ITask, start: Date, end: Date) => {
+    const elementDate = new Date(element.date);
+    return elementDate >= start && elementDate <= end
+  },
   byName: (element: ITask, name: string) => element.name === name,
   byNameContains: (element: ITask, name: string) => element.name.includes(name),
   byStatus: (element: ITask, status: TaskStatus) => element.status === status,
@@ -21,5 +23,5 @@ export default interface ICalendar<T extends ITask> {
   addTask(task: T): Promise<void>;
   updateTask(id: string, newTask: T): Promise<T>;
   deleteTask(id: string): Promise<T>;
-  filterTasks(filter: IFilter<T>, ...param: never[]): Promise<T[]>;
+  filterTasks(filter: IFilter<T>, ...param: unknown[]): Promise<T[]>;
 }

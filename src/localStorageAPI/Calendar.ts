@@ -22,9 +22,7 @@ export default class Calendar implements ICalendar<ITask> {
         );
       }
     } else {
-      throw new CalendarError(
-        `Couldn't create Calendar object, there is no data with namespace: ${namespace}`,
-      );
+      this.tasks = [];
     }
   }
 

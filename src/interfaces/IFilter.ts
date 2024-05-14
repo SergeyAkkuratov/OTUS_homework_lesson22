@@ -1,7 +1,8 @@
 import { ITask } from "./ITask";
 
 export interface IFilter<T extends ITask> {
-  (element: T, ...params: unknown[]): boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (element: T, ...params: any[]): boolean;
 }
 
 export interface IFilters<T extends ITask> {

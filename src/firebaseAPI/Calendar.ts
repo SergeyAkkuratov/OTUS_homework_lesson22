@@ -42,7 +42,7 @@ export default class Calendar implements ICalendar<ITask> {
     return new Promise<ITask>((resolve) => {
       get(child(this.database, id)).then((snapshot) => {
         if (snapshot.exists()) {
-          resolve(snapshot.val());
+          resolve(snapshot.val() as ITask);
         } else {
           throw new CalendarError(`There is no task with id ${id}`);
         }

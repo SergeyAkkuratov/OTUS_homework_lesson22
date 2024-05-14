@@ -4,7 +4,7 @@ import "./style.css";
 
 const newTask: ITask = {
   id: crypto.randomUUID(),
-  date: new Date(),
+  date: new Date().toISOString(),
   name: "TEST2",
   status: TaskStatus.NEW,
   tags: ["tag3"],
@@ -13,9 +13,9 @@ const newTask: ITask = {
 
 async function run() {
   const calendar: Calendar = new Calendar("tasks");
-  const task: ITask = await calendar.getTask("47fb091c-a676-4462-88ca-dc57508a09e9");
-  console.log(task);
   await calendar.addTask(newTask);
+  const currentTask: ITask = await calendar.getTask(newTask.id);
+  console.log(currentTask);
   const tasks: ITask[] = await calendar.filterTasks(calendar.filters.byTagContains, "tag3")
   console.log(tasks);
   const deleteTask = await calendar.deleteTask(newTask.id);

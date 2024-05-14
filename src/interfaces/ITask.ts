@@ -8,7 +8,7 @@ export enum TaskStatus {
 
 export interface ITask {
   id: string;
-  date: Date;
+  date: string;
   name: string;
   status: TaskStatus;
   tags: string[];
